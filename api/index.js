@@ -161,7 +161,7 @@ app.post('/places', (req, res) => {
 })
 
 // ------------------ GET PLACES --------------------- //
-app.get('/places', (req, res) => {
+app.get('/user-places', (req, res) => {
 	const { token } = req.cookies
 	jwt.verify(token, jwtSecret, {}, async (err, userData) => {
 		if (err) throw err
@@ -203,6 +203,10 @@ app.put('/places', async (req, res) => {
 			res.status(200).json({ success: true, message: 'Update places successfully!'})
 		}
 	})
+})
+
+app.get('/places', async (req, res) => {
+	res.json(await Place.find())
 })
 
 app.listen(4000)

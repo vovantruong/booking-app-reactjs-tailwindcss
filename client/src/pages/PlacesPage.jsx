@@ -7,7 +7,7 @@ const PlacesPage = () => {
 	const [places, setPlace] = useState([])
 
 	useEffect(() => {
-		axios.get('/places').then(({ data }) => {
+		axios.get('/user-places').then(({ data }) => {
 			setPlace(data)
 		})
 	}, [])
@@ -43,7 +43,7 @@ const PlacesPage = () => {
 							to={'/account/places/' + place._id}
 							className="flex gap-4 bg-gray-200 p-4 rounded-2xl mb-3"
 						>
-							<div className="flex w-32 overflow-hidden h-auto bg-gray-300 rounded grow shrink-0">
+							<div className="flex w-32 overflow-hidden h-auto bg-gray-300 rounded grow-0 shrink-0">
 								{place.photos.length > 0 && (
 									<img
 										className="object-cover"
