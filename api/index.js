@@ -2,7 +2,6 @@ require('dotenv').config({ path: './config.env' })
 const express = require('express')
 const cors = require('cors')
 const app = express()
-const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const bcryptSalt = bcrypt.genSaltSync(10)
 const jwt = require('jsonwebtoken')
@@ -10,11 +9,11 @@ const cookieParser = require('cookie-parser')
 const imageDownloader = require('image-downloader')
 const multer = require('multer')
 const fs = require('fs')
+const connectDB = require('./config/connectDB')
 
 const User = require('./models/User')
 const Place = require('./models/Place')
-const connectDB = require('./config/connectDB')
-
+const Booking = require('./models/Booking')
 
 app.use(express.json())
 app.use(cookieParser())
@@ -32,6 +31,15 @@ app.use(
 connectDB()
 //JWT SECRET
 const jwtSecret = 'ahalsdgflwvrfb2bdhf9239ahwrlewarfa'
+
+function getUserDataFromToken(req) {
+	return new Promise((resolve, reject) => {
+		jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
+			if (err) throw err
+			resolve(userData)
+		})
+	})
+}
 
 // ------------------ REGISTER --------------------- //
 app.post('/register', async (req, res) => {
@@ -150,7 +158,7 @@ app.post('/places', (req, res) => {
 				checkIn,
 				checkOut,
 				maxGuests,
-				price
+				price,
 			})
 
 			res.status(200).json({ success: true, message: 'Create places successfully!', data: placesDoc })
@@ -180,7 +188,8 @@ app.get('/places/:id', async (req, res) => {
 // ------------------ UPDATE PLACES --------------------- //
 app.put('/places', async (req, res) => {
 	const { token } = req.cookies
-	const { id, title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxGuests, price } = req.body
+	const { id, title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxGuests, price } =
+		req.body
 
 	jwt.verify(token, jwtSecret, {}, async (err, userData) => {
 		if (err) throw err
@@ -197,10 +206,10 @@ app.put('/places', async (req, res) => {
 				checkIn,
 				checkOut,
 				maxGuests,
-				price
+				price,
 			})
 			await placeDoc.save()
-			res.status(200).json({ success: true, message: 'Update places successfully!'})
+			res.status(200).json({ success: true, message: 'Update places successfully!' })
 		}
 	})
 })
@@ -209,4 +218,35 @@ app.get('/places', async (req, res) => {
 	res.json(await Place.find())
 })
 
-app.listen(4000)
+app.post('/bookings', async (req, res) => {
+	const userData = await getUserDataFromToken(req)
+	const { place, checkIn, checkOut, numberOfGuests, name, phone, price } = req.body
+
+	await Booking.create({
+		place,
+		user: userData.id,
+		checkIn,
+		checkOut,
+		numberOfGuests,
+		name,
+		phone,
+		price,
+	})
+		.then((doc) => {
+			res.json(doc)
+		})
+		.catch((err) => {
+			throw err
+		})
+})
+
+app.get('/bookings', async (req, res) => {
+	const userData = await getUserDataFromToken(req)
+
+	const booking = await Booking.find({ user: userData.id }).populate('place');
+	res.json(booking)
+})
+
+const POST = 4000
+
+app.listen(POST, () => console.log(`Server running on post ${POST}`))
