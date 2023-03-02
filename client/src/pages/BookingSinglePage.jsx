@@ -31,7 +31,7 @@ const BookingSinglePage = () => {
 			<div className="bg-gray-200 p-6 my-6 rounded-2xl flex justify-between items-center">
 				<div>
 					<h2 className="text-2xl mb-2 font-medium">Your booking information</h2>
-					<BookingDates booking={booking} className="text-sm"/>
+					<BookingDates booking={booking} className="text-sm" />
 				</div>
 				<div className='bg-primary p-4 text-white rounded-2xl'>
 					<p>Total price:</p>
